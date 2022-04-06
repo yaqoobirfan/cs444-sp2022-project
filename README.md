@@ -30,7 +30,7 @@
 - `void get_session_file_path(int session_id, char path[])`: Gets the path for the given session.
 - `void load_all_sessions()`: Loads every session from the disk one by one if it exists.
 - `void save_session(int session_id)`: Saves the given sessions to the disk.
-- `int register_browser(int browser_socket_fd)`: Assigns a browser ID to the new browser. Determines the correct session ID for the new browser through the interaction with it.
+- `int register_browser(int browser_socket_fd)`: Assigns a browser ID to the new browser. Determines the correct session ID for the new browser through the interaction with it. 
 - `void browser_handler(int browser_socket_fd)`: Handle the given browser.
 - `void start_server(int port) `: Starts the server.
 
