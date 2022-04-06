@@ -17,4 +17,4 @@ ssize_t send_message(int socket_fd, const char message[]);
 // Receives the message through socket.
 ssize_t receive_message(int socket_fd, char message[]);
 
-#endif //PROJECT_NETWORK_H
+#endif //PROJECT_NETWORK_H 
