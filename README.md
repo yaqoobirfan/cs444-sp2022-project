@@ -59,6 +59,7 @@
 - Port: 7000
 - Buffer length: 1024
 
+
 ### Functions
 
 - `ssize_t send_message(int socket_fd, const char message[])`: Sends the message through socket.
