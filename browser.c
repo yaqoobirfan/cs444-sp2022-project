@@ -204,4 +204,4 @@ int main(int argc, char *argv[]) {
     start_browser(host_ip, port);
 
     exit(EXIT_SUCCESS);
-}
+} 
