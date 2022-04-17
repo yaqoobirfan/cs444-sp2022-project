@@ -148,7 +148,6 @@ bool process_message(int session_id, const char message[]) {
    
     
    /* int valid_input = 0;
-
     // Extract the first token
     char * token1 = strtok(token, "=");
     // loop through the string to extract all other tokens
@@ -167,7 +166,6 @@ bool process_message(int session_id, const char message[]) {
        token1 = strtok(NULL, " ");
       
     }
-
     if (valid_input == 2) {
        printf("Input is valid");
     } else {
