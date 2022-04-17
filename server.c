@@ -274,24 +274,28 @@ void load_all_sessions() {
         get_session_file_path(i, path);
         
         // declaration of the file pointer
-        FILE *fp;
+        FILE *file;
         
         //open a file for the session if there exists any file
-        if((fp = fopen(path, "r"))){
+        if((file = fopen(path, "r"))){
             //reterive the data from the file
             char data[BUFFER_LEN];
             memset(data, 0, BUFFER_LEN);
             char a[1] = {'0'};
             while(a[0] != EOF){
-                a[0] = fgetc(fp);
+                a[0] = fgetc(file);
                 if(a[0] != EOF){
+                    //string cat here
                     strncat(data,a,1);
                 }
             }
             
             //start parsing of data from the file
+            
+           // initialize string to a char  pointer 
             char *par;
             par = strtok(data, " \n=");
+            //check for the condition 
             while(par != NULL){
                 char *var = par;
                 par = strtok(NULL, " \n=");
@@ -303,7 +307,7 @@ void load_all_sessions() {
                 }
             }
             //close file operation
-            fclose(fp);
+            fclose(file);
         }
     }
 }
