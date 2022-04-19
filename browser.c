@@ -1,4 +1,4 @@
-#include "net_util.h" 
+#include "net_util.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -67,7 +67,23 @@ void read_user_input(char message[]) {
 void load_cookie() {
     // TODO: For Part 1.2, write your file operation code here.
     // Hint: The file path of the cookie is stored in COOKIE_PATH.
-    session_id = -1; // You may move this line to anywhere inside this fucntion.
+    
+    
+    FILE *fp;
+    if((fp = fopen(COOKIE_PATH, "r"))){
+        char data[BUFFER_LEN];
+        char a[1] = {'0'};
+        while(a[0] != EOF){
+            a[0] = fgetc(fp);
+            if(a[0] != EOF){
+                strncat(data,a,1);
+            }
+        }
+        session_id = ta(data);
+    }
+    else{
+        session_id = -1;
+    }
 }
 
 /**
@@ -76,6 +92,14 @@ void load_cookie() {
 void save_cookie() {
     // TODO: For Part 1.2, write your file operation code here.
     // Hint: The file path of the cookie is stored in COOKIE_PATH.
+    
+    //file pointer
+    FILE *fp;
+    fp = fopen(COOKIE_PATH, "w+");
+    char output[BUFFER_LEN];
+    fprintf(fp, "%d", session_id);
+    //file close
+    fclose(fp);
 }
 
 /**
@@ -112,7 +136,7 @@ void server_listener() {
 /**
  * Starts the browser. Sets up the connection, start the listener thread,
  * and keeps a loop to read in the user's input and send it out.
- * 
+ *
  * @param host_ip the host ip to connect
  * @param port the host port to connect
  */
@@ -204,4 +228,5 @@ int main(int argc, char *argv[]) {
     start_browser(host_ip, port);
 
     exit(EXIT_SUCCESS);
-} 
+}
+
