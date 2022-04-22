@@ -127,7 +127,9 @@ void server_listener() {
     receive_message(server_socket_fd, message);
 
     // TODO: For Part 3.1, add code here to print the error message.
-
+if(strcmp(message, "ERROR") == 0)
+             puts("Invalid input!");
+         else
     puts(message);
 
     //}
