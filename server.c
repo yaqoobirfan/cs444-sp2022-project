@@ -152,7 +152,7 @@ bool process_message(int session_id, const char message[]) {
   
 
     // Makes a copy of the string since strtok() will modify the string that it is processing.
-    char data[BUFFER_LEN];
+  //  char data[BUFFER_LEN];
    /* int valid_input = 0;
 
     // Extract the first token
@@ -182,8 +182,50 @@ bool process_message(int session_id, const char message[]) {
     
 
     // Makes a copy of the string since strtok() will modify the string that it is processing.
-    char data[BUFFER_LEN];
+    //////////////////////////////////////////////////code from here 
+   char data[BUFFER_LEN];
     strcpy(data, message);
+    
+       token = strtok(data, " ");
+    result_idx = token[0] - 'a';
+    char c = result_idx + 97;
+
+    if(!(islower(c) && isalpha(c))){
+    	return false;
+    }
+    else if(token[1] != NULL){
+    	return false;
+    }
+
+    // Processes "=".
+    token = strtok(NULL, " ");
+    
+	if(token == NULL){
+    return false;}
+    
+    int equal = token[0] - '=';
+    if(token[0] != 0 && token[1] != NULL){
+    return false;
+    }
+
+    // Processes the first variable/value.
+    token = strtok(NULL, " ");
+    
+    	if(token == NULL){
+    return false;}
+    
+    if (is_str_numeric(token)) {
+        first_value = strtod(token, NULL);
+    } else {
+        int first_idx = token[0] - 'a';
+        char c = first_idx + 97;
+        if(!(islower(c) && isalpha(c)) || token[1] != NULL){
+    	return false;
+    }     
+        first_value = session_list[session_id].values[first_idx];
+    }
+    ///////////////////////////////////////////////////////////////////////// updated the code for the string input validation
+    
 
     // Processes the result variable.
     //printf("Testing\n");
@@ -197,11 +239,11 @@ bool process_message(int session_id, const char message[]) {
     // Processes the result variable.
     token = strtok(data, " ");
     if(token == NULL) || !(islower()) && ()
-    printf("%c\n",token[0]);
-    printf("%c\n",token[1]);
-    printf("%c\n",token[2]);
+   // printf("%c\n",token[0]);
+   // printf("%c\n",token[1]);
+  //  printf("%c\n",token[2]);
     result_idx = token[0] - 'a';
-    printf("%d\n",result_idx);
+   // printf("%d\n",result_idx);
     // Processes "=".
     token = strtok(NULL, " ");
 
