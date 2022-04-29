@@ -1,6 +1,7 @@
 all: server browser
 
 server: server.c net_util.h net_util.c
+        @mkdir -p sessions
 	gcc -std=c11 server.c net_util.c -o server -pthread
 
 browser: browser.c net_util.h net_util.c
