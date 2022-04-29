@@ -10,6 +10,8 @@
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <netinet/in.h>
+#include<assert.h>
+
 
 #define NUM_VARIABLES 26
 #define NUM_SESSIONS 128
@@ -17,10 +19,12 @@
 #define DATA_DIR "./sessions"
 #define SESSION_PATH_LEN 128
 
+//srand(time(NULL));
+
 typedef struct browser_struct {
     bool in_use;
     int socket_fd;
-    int session_id;
+    int session_id; // = rand() % NUM_SESSIONS;
 } browser_t;
 
 typedef struct session_struct {
@@ -30,6 +34,8 @@ typedef struct session_struct {
 } session_t;
 
 static browser_t browser_list[NUM_BROWSER];                             // Stores the information of all browsers.
+//making changes for session_hash
+static session_t session_hash[NUM_SESSIONS];
 // TODO: For Part 3.2, convert the session_list to a simple hashmap/dictionary.
 static session_t session_list[NUM_SESSIONS];                            // Stores the information of all sessions.
 static pthread_mutex_t browser_list_mutex = PTHREAD_MUTEX_INITIALIZER;  // A mutex lock for the browser list.
@@ -55,8 +61,7 @@ void get_session_file_path(int session_id, char path[]);
 void load_all_sessions();
 
 // Saves the given sessions to the disk.
-void save_session(int session_id);
-
+void save_session(int session_id, char response[]);
 
 // Assigns a browser ID to the new browser.
 // Determines the correct session ID for the new browser
@@ -67,13 +72,46 @@ int register_browser(int browser_socket_fd);
 // processing the message received,
 // broadcasting the update to all browsers with the same session ID,
 // and backing up the session on the disk.
+//void *browser_handler(void *arg);
 void browser_handler(int browser_socket_fd);
 
 // Starts the server.
 // Sets up the connection,
 // keeps accepting new browsers,
 // and creates handlers for them.
+
+// we made change
+void check_data_dir();
+
 void start_server(int port);
+
+int hash(int);
+
+// made change
+int generate_key();
+
+// made change
+session_t* get_session(int key);
+// made change
+int hash(int key)
+{
+    return key % NUM_SESSIONS;
+}
+// made change
+int generate_key()
+{
+    srand(time(NULL));
+    return rand();
+}
+// made change
+
+session_t* get_session(int session_id)
+{
+    int h = hash(session_id);
+    assert(h < NUM_SESSIONS);
+    return &session_hash[h];
+}
+
 
 /**
  * Returns the string format of the given session.
@@ -136,146 +174,119 @@ bool is_str_numeric(const char str[]) {
  * @return a boolean that determines if the given message is valid
  */
 bool process_message(int session_id, const char message[]) {
-    printf("Testing\n");
     char *token;
     int result_idx;
     double first_value;
     char symbol;
     double second_value;
-  
- 
 
     // TODO: For Part 3.1, write code to determine if the input is invalid and return false if it is.
     // Hint: Also need to check if the given variable does exist (i.e., it has been assigned with some value)
     // for the first variable and the second variable, respectively.
-  
-  
+
 
     // Makes a copy of the string since strtok() will modify the string that it is processing.
-  //  char data[BUFFER_LEN];
-   /* int valid_input = 0;
-
-    // Extract the first token
-    char * token1 = strtok(token, "=");
-    // loop through the string to extract all other tokens
-    while( token1 != NULL ) { //printing each token
-       if(isdigit(*token1)) {
-          printf("digit %s \n", token1);
-          valid_input++;
-          if (valid_input == 1) {
-             printf("Invalid input format provided.");
-             return 0;
-          }
-       }else {
-          printf("\n string %s\n", token1);
-          valid_input++;
-       }
-       token1 = strtok(NULL, " ");
-      
-    }
-
-    if (valid_input == 2) {
-       printf("Input is valid");
-    } else {
-      printf("Input is not valid");
-    }  */
-    
-
-    // Makes a copy of the string since strtok() will modify the string that it is processing.
-    //////////////////////////////////////////////////code from here 
-   char data[BUFFER_LEN];
+    char data[BUFFER_LEN];
     strcpy(data, message);
-    
-       token = strtok(data, " ");
+
+    // Processes the result variable.
+    token = strtok(data, " ");
     result_idx = token[0] - 'a';
     char c = result_idx + 97;
 
     if(!(islower(c) && isalpha(c))){
     	return false;
     }
-    else if(token[1] != NULL){
+    else if(token[1] != '\0'){
     	return false;
     }
 
     // Processes "=".
     token = strtok(NULL, " ");
-    
+
 	if(token == NULL){
     return false;}
-    
+
     int equal = token[0] - '=';
-    if(token[0] != 0 && token[1] != NULL){
+    if(token[0] != 0 && token[1] != '\0'){
     return false;
     }
 
     // Processes the first variable/value.
     token = strtok(NULL, " ");
-    
+
     	if(token == NULL){
     return false;}
-    
+
     if (is_str_numeric(token)) {
         first_value = strtod(token, NULL);
     } else {
         int first_idx = token[0] - 'a';
         char c = first_idx + 97;
-        if(!(islower(c) && isalpha(c)) || token[1] != NULL){
+        if(!(islower(c) && isalpha(c)) || token[1] != '\0'){
     	return false;
-    }     
-        first_value = session_list[session_id].values[first_idx];
     }
-    ///////////////////////////////////////////////////////////////////////// updated the code for the string input validation
-    
-
-    // Processes the result variable.
-    //printf("Testing\n");
-    token = strtok(data, " ");
-    /*if ((token==NULL) || !(islower(token[0])) && (token[1]='\0')){
-        return false;
-    }*/
-  
-    strcpy(data, message);
-
-    // Processes the result variable.
-    token = strtok(data, " ");
-    if(token == NULL) || !(islower()) && ()
-   // printf("%c\n",token[0]);
-   // printf("%c\n",token[1]);
-  //  printf("%c\n",token[2]);
-    result_idx = token[0] - 'a';
-   // printf("%d\n",result_idx);
-    // Processes "=".
-    token = strtok(NULL, " ");
-
-    // Processes the first variable/value.
-    token = strtok(NULL, " ");
-    if (is_str_numeric(token)) {
-        first_value = strtod(token, NULL);
-    } else {
-        int first_idx = token[0] - 'a';
         first_value = session_list[session_id].values[first_idx];
     }
 
     // Processes the operation symbol.
     token = strtok(NULL, " ");
+
     if (token == NULL) {
         session_list[session_id].variables[result_idx] = true;
         session_list[session_id].values[result_idx] = first_value;
         return true;
     }
     symbol = token[0];
+    if (symbol == '+') {
+        if(token[1] != '\0'){
+    	return false;
+    }
+
+    } else if (symbol == '-') {
+            if(token[1] != '\0'){
+    	return false;
+    }
+
+    } else if (symbol == '*') {
+            if(token[1] != '\0'){
+    	return false;
+    }
+
+    } else if (symbol == '/') {
+                if(token[1] != '\0'){
+    	return false;
+    }
+    }
+    else
+    {
+    return false;
+    }
 
     // Processes the second variable/value.
     token = strtok(NULL, " ");
+
+	if(token == NULL){
+    return false;}
+
     if (is_str_numeric(token)) {
         second_value = strtod(token, NULL);
     } else {
         int second_idx = token[0] - 'a';
+        char c = second_idx + 97;
+        if(!(islower(c) && isalpha(c)) || token[1] != '\0'){
+    	return false;
+    	}
         second_value = session_list[session_id].values[second_idx];
     }
 
     // No data should be left over thereafter.
     token = strtok(NULL, " ");
+
+    if(token == NULL){
+    }
+	else if(token[0] != '\0'){
+    return false;}
 
     session_list[session_id].variables[result_idx] = true;
 
@@ -320,48 +331,48 @@ void get_session_file_path(int session_id, char path[]) {
  * Loads every session from the disk one by one if it exists.
  */
 void load_all_sessions() {
-   
-   // void save_session(int session_id, char response[])
     // TODO: For Part 1.1, write your file operation code here.
     // Hint: Use get_session_file_path() to get the file path for each session.
     //       Don't forget to load all of sessions on the disk.
-    //loop for 128 sessions
-     for(int i = 0; i < 128; i++){
-         char path[BUFFER_LEN];
-         get_session_file_path(i, path);
-         //Point of the file type to Declaration of file
-         FILE *fp;
-         
-         // open a file for an existing session // reading mode
-         if((fp = fopen(path, "r"))){
-             //retrieve the data from the file
-             session_t session = session_list[i];
-             char data[BUFFER_LEN];
-             memset(data, 0, BUFFER_LEN);
-             char a[1] = {'0'};
-             while(a[0] != EOF){
-                 a[0] = fgetc(fp);
-                 if(a[0] != EOF){
-                     strncat(data,a,1);
-                 }
-             }
-             //parsing the file data
-             char *par;
-             par = strtok(data, " \n=");
-             while(par != NULL){
-                 char *var = par;
-                 par = strtok(NULL, " \n=");
-                 double val = atof(par);
-                 session.variables[*var-'a'] = true;
-                 session.values[*var-'a'] = val;
-                 if(par != NULL){
-                     par = strtok(NULL, " \n=");
-                 }
-             }
-             //close the file
-             fclose(fp);
-         }
-     }
+
+    //For Loop for the sessions
+    for(int i = 0; i < NUM_SESSIONS; i++){
+        char path[BUFFER_LEN];
+        get_session_file_path(i, path);
+
+        // declaration of the file pointer
+        FILE *fp;
+
+        //open a file for the session if there exists any file
+        if((fp = fopen(path, "r"))){
+            //reterive the data from the file
+            char data[BUFFER_LEN];
+            memset(data, 0, BUFFER_LEN);
+            char a[1] = {'0'};
+            while(a[0] != EOF){
+                a[0] = fgetc(fp);
+                if(a[0] != EOF){
+                    strncat(data,a,1);
+                }
+            }
+
+            //start parsing of data from the file
+            char *par;
+            par = strtok(data, " \n=");
+            while(par != NULL){
+                char *var = par;
+                par = strtok(NULL, " \n=");
+                double val = atof(par);
+                session_list[i].variables[*var-'a'] = true;
+                session_list[i].values[*var-'a'] = val;
+                if(par != NULL){
+                    par = strtok(NULL, " \n=");
+                }
+            }
+            //close file operation
+            fclose(fp);
+        }
+    }
 }
 
 /**
@@ -369,24 +380,22 @@ void load_all_sessions() {
  *
  * @param session_id the session ID
  */
-void save_session(int session_id) {
-    
-    //void save_session(int session_id, char response[]){
+void save_session(int session_id, char response[]) { //added result parameter to get the session status from
     // TODO: For Part 1.1, write your file operation code here.
     // Hint: Use get_session_file_path() to get the file path for each session.
-    char response[BUFFER_LEN];
     char path[BUFFER_LEN];
-        //set the session file path to path string
-        get_session_file_path(session_id, path);
-    //Declaration file to the pointer
-        FILE *fp;
-       //opens session file // w+ open the file for reading and writting mode
-       fp = fopen(path, "w+");
-        //writes data to session file
-      fputs(response, fp);
-        //close the file
-        fclose(fp);
-    }
+
+    //sets the session file path to path str
+    get_session_file_path(session_id, path);
+    // declaration of the file pointer, file being accessed
+    FILE *fp;
+
+    //creating the file or opens session file in read and write mode w+
+    fp = fopen(path, "w+");
+    fputs(response, fp);
+    //close file operation
+    fclose(fp);
+}
 
 /**
  * Assigns a browser ID to the new browser.
@@ -401,30 +410,47 @@ int register_browser(int browser_socket_fd) {
     // TODO: For Part 2.2, identify the critical sections where different threads may read from/write to
     //  the same shared static array browser_list and session_list. Place the lock and unlock
     //  code around the critical sections identified.
-
+    pthread_mutex_lock(&browser_list_mutex);
     for (int i = 0; i < NUM_BROWSER; ++i) {
+
         if (!browser_list[i].in_use) {
+            //lock
+
             browser_id = i;
             browser_list[browser_id].in_use = true;
+
             browser_list[browser_id].socket_fd = browser_socket_fd;
+            //unlock
+
             break;
         }
+
     }
+    pthread_mutex_unlock(&browser_list_mutex);
 
     char message[BUFFER_LEN];
     receive_message(browser_socket_fd, message);
 
     int session_id = strtol(message, NULL, 10);
+    //int session_id = rand() % NUM_SESSIONS;
     if (session_id == -1) {
+
+        pthread_mutex_lock(&session_list_mutex);
         for (int i = 0; i < NUM_SESSIONS; ++i) {
             if (!session_list[i].in_use) {
+                //lock
+
                 session_id = i;
                 session_list[session_id].in_use = true;
+                // unlock
                 break;
             }
         }
+        pthread_mutex_unlock(&session_list_mutex);
     }
+
     browser_list[browser_id].session_id = session_id;
+
 
     sprintf(message, "%d", session_id);
     send_message(browser_socket_fd, message);
@@ -441,7 +467,6 @@ int register_browser(int browser_socket_fd) {
  */
 void browser_handler(int browser_socket_fd) {
     int browser_id;
-
     browser_id = register_browser(browser_socket_fd);
 
     int socket_fd = browser_list[browser_id].socket_fd;
@@ -454,8 +479,6 @@ void browser_handler(int browser_socket_fd) {
         char response[BUFFER_LEN];
 
         receive_message(socket_fd, message);
-        printf("TestONE\n");
-       // return;
         printf("Received message from Browser #%d for Session #%d: %s\n", browser_id, session_id, message);
 
         if ((strcmp(message, "EXIT") == 0) || (strcmp(message, "exit") == 0)) {
@@ -466,22 +489,24 @@ void browser_handler(int browser_socket_fd) {
             printf("Browser #%d exited.\n", browser_id);
             return;
         }
-        printf("Test1\n");
-        printf("%d",message[0]);
+
         if (message[0] == '\0') {
             continue;
         }
 
         bool data_valid = process_message(session_id, message);
         if (!data_valid) {
+        	//session_to_str(session_id, "Ivalid Input");
+        	
             // TODO: For Part 3.1, add code here to send the error message to the browser.
+            broadcast(session_id, "ERROR");
+           // printf("Please the value again");
             continue;
         }
 
         session_to_str(session_id, response);
         broadcast(session_id, response);
-
-        save_session(session_id);
+        save_session(session_id, response);
 
     }
 }
@@ -494,6 +519,7 @@ void browser_handler(int browser_socket_fd) {
  */
 void start_server(int port) {
     // Loads every session if there exists one on the disk.
+    //Do we need to any print statment for load session
     load_all_sessions();
 
     // Creates the socket.
@@ -519,7 +545,8 @@ void start_server(int port) {
         exit(EXIT_FAILURE);
     }
     printf("The server is now listening on port %d.\n", port);
-
+    pthread_t browser_threads[NUM_BROWSER];
+    int i = 0;
     // Main loop to accept new browsers and creates handlers for them.
     while (true) {
         struct sockaddr_in browser_address;
@@ -529,10 +556,19 @@ void start_server(int port) {
             perror("Socket accept failed");
             continue;
         }
-
-        // Starts the handler thread for the new browser.
+        //printf("*********************** \n");
+        //printf("Browser: \n");
         // TODO: For Part 2.1, creat a thread to run browser_handler() here.
-        browser_handler(browser_socket_fd);
+        pthread_create(&browser_threads[i++], NULL, (void*)browser_handler, browser_socket_fd);
+
+        if (i >= NUM_BROWSER) {
+            i = 0;
+
+            while (i < NUM_BROWSER) {
+                pthread_join(browser_threads[i++], NULL);
+            }
+            i = 0;
+        }
     }
 
     // Closes the socket.
